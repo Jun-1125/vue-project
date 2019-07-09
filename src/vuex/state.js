@@ -13,4 +13,8 @@ export default {
   user: {}, // d登录用户信息对象
   token: localStorage.getItem('token_key'),//初始值
   
+  goods: [], // 商品列表
+  ratings: [], // 商家评价列表
+  info: {}, // 商家信息
+
 }

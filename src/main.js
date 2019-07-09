@@ -7,6 +7,7 @@ import router from './router'
 import store from './vuex/store'
 import Header from './components/Header/Header.vue'
 import Star from './components/Star/Star.vue'
+import './mock/mockServer'
 
 import { Button } from 'mint-ui'
 //定义全局组件(所有组件都可以看到) 组件引入不能使用先注册，就是指定标签名

@@ -7,7 +7,10 @@ import {
   reqAddress,
   reqCategorys,
   reqShops,
-  reqAutoLogin
+  reqAutoLogin,
+  reqGoods,
+  reqRatings,
+  reqInfo
 } from '../api'
 
 import { 
@@ -17,7 +20,10 @@ import {
   RECEIVE_USER,
   RESET_USER,
   RECEIVE_TOKEN,
-  RESET_TOKEN
+  RESET_TOKEN,
+  RECEIVE_GOODS,
+  RECEIVE_RATINGS,
+  RECEIVE_INFO
 } from "./mutation-types"
 
 export default {
@@ -71,6 +77,7 @@ export default {
     }
   },
 
+
   //记录user:持久化保存token,在state中保存user
   recordUser ({commit},user) {
     // 将user的token保存到locaStorage中
@@ -104,5 +111,44 @@ export default {
         commit(RECEIVE_USER,{ user })
       }
     }
+  },
+
+
+
+  //异步获取商品列表   cb=callback回调函数
+// 异步获取商家商品列表
+async getShopGoods({commit}, cb) {
+  const result = await reqGoods()
+  if(result.code===0) {
+    const goods = result.data
+    commit(RECEIVE_GOODS, {goods})
+    cb && cb()
   }
+},
+
+  //异步获取商家信息
+ async getShopInfo({commit},cb) {
+  // 发异步ajax请求   到api请求接口看需要传的数据 reqShops只需要一个数据，所以用对象包起来
+  const result = await reqInfo()
+  // 有了结果后, 提交mutation
+  if (result.code===0) {
+    const info = result.data
+    commit(RECEIVE_INFO, info)
+
+    cb && cb()
+  }
+},
+
+//异步获取商检评论列表
+async getRatings({commit},cb) {
+  // 发异步ajax请求   到api请求接口看需要传的数据 reqShops只需要一个数据，所以用对象包起来
+  const result = await reqRatings()
+  // 有了结果后, 提交mutation
+  if (result.code===0) {
+    const ratings = result.data
+    commit(RECEIVE_RATINGS, ratings)
+
+    cb && cb()
+  }
+},
 }
