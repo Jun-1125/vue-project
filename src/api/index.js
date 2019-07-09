@@ -16,14 +16,20 @@ export const reqAddress = (longitude, latitude) => ajax.get(BASE + `/position/${
 // 2.获取食品分类列表
 export const reqCategorys = () => ajax({
   method: 'GET',
-  url: BASE + '/index_category'
+  url: BASE + '/index_category',
+  headers:{
+    needToken:true//拦截器可以看到 放在headers内
+  }
 })
 
 // 3.根据经纬度获取商铺列表
 export const reqShops = ({latitude, longitude}) => ajax({
   method: 'GET',
   url: BASE + '/shops',
-  params: { latitude, longitude }
+  params: { latitude, longitude },
+  headers:{
+    needToken:true//拦截器可以看到 放在headers内
+  }
 })
 
 // 发送短信验证码
@@ -52,4 +58,10 @@ export const reqSmsLogin = (phone, code) => ajax({
     phone,
     code
   }
+})
+
+//自动登录的请求
+export const reqAutoLogin = () => ajax({
+  url: BASE + '/auto_login',
+  headers: { needToken: true }
 })

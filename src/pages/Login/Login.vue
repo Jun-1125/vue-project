@@ -88,7 +88,7 @@
         isShowPwd:false
       }
     }
-form 表单会自动提交数据，所以需要阻止默认行为  @click.prevent="sendCode"
+form 表单会自动提交数据，所以需要阻止默认行为  @click.prevent=""
 <button :disabled="!isRightPhone" class="get_verification" :class="{right_phone_number:isRightPhone}">获取验证码</button>
            &父级选择器  （设置样式使用了）  &子找父   &.right_phone_number  color black
 
@@ -195,16 +195,17 @@ import { reqSendCode, reqPwdLogin, reqSmsLogin } from '../../api'
           result = await reqSmsLogin(phone,code)
         }
 
-       /*  // 2.根据结果处理进行响应处理
+        // 2.根据结果处理进行响应处理
         console.log('result',result)
 
         //成功的状态code=0，data中包含_id,name,token {code: 0, data: {code: 0   data: {_id: "", name: "", token:}
-        // token和cookies一样是有有效期的 */
+        // token和cookies一样是有有效期的
         if(result.code === 0){
           // 将user信息保存到state中
           const user = result.data
           //this.$store.commit(RECEIVE_USER,{user})=====在action中定义了一个函数记录user（持久化保存token,在state中保存user）
-          //dispatch做了两件事： 将token传到locaStorage中,将user传到state中
+          //dispatch做了两件事： 将token传到locaStorage中,将user传到vuex中的state
+          // 请求需要授权检查的接口时，自动携带token，在响应拦截器中操作
           this.$store.dispatch('recordUser',user)
           // 跳转到个人中心
           this.$router.replace('/profile')

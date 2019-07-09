@@ -9,6 +9,7 @@
 import axios from 'axios'
 // const qs = require('qs')
 import qs from 'qs'
+import { Toast } from 'mint-ui'
 
 import store from '../vuex/store'
 import router from '../router'
@@ -24,10 +25,25 @@ axios.interceptors.request.use((config) => {
     config.data = qs.stringify(data) // {name: 'tom', pwd: '123'} ==> name=tom&pwd=123
   }
 
-  // 如果浏览器有token，就自动携带上token
+  /* // 如果浏览器有token，就自动携带上token，存在localStorage中，
+  // 也可以从文件中读取，文件中读取比localStorage快，在状态state中
   const token = localStorage.getItem('token_key')
   if(token){
     config.headers.Authorization = 'token' + token
+  } */
+  // 如果请求配置标识了需要携带的token
+  const { needToken } = config.headers
+  if(needToken){
+    // 取出state中的token
+    const token = store.state.token
+    if(token){//如果token有值，添加授权的头，值为token
+      config.headers.Authorization = token
+    }else{
+      //抛出异常，直接进行错误处理流程(不需要发请求)
+      const error = new Error('没有token,不用发请求')
+      error.status = 401 //添加一个标识
+      throw error
+    }
   }
 
   // 如果浏览器
@@ -41,18 +57,34 @@ axios.interceptors.response.use(response => {
   return response.data
 }, error => {// 请求异常
   //alert('请求异常: ' + error.message)
+ if(!error.response){
+   if(error.status===401){
+      if(router.currentRoute.path='/login'){
+        router.replace('/login')
+        Toast(error.message)
+      }else{
+        console.log('没有token,请求前取消的请求，已在login，不许与跳转')
+      }
+   }
+  //  请求后的异常
+ }else{
   const status = error.response.status
   const msg = error.message
-  if (status === 401) { // 未授权
+  if (status === 401) { // 授权过期
     // 退出登录    跳转到登录界面
-    store.dispatch('logout')
-    router.replace('/login')
-    alert(error.response.data.message)
-  } else if (status === 404) {
-    alert('请求的资源不存在')
+    if(router.currentRoute.path !=='/login'){
+      store.dispatch('logout')
+      router.replace('/login')
+      Toast(error.response.data.message)
+    }else{
+      console.log('token过期的请求，已在login')
+    }
+  }else if (status === 404) {
+    Toast('请求的资源不存在')
   } else {
-    alert('请求异常: ' + msg)
+    Toast('请求异常: ' + msg)
   }
+ }
   // return error
   // return Promise.reject(error)
   return new Promise(() => {})  // 中断promise链

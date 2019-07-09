@@ -10,5 +10,7 @@ export default {
   categorys: [], // 分类数组
   shops: [], //商家数组
 
-  user: {}, // 登陆用户信息对象
+  user: {}, // d登录用户信息对象
+  token: localStorage.getItem('token_key'),//初始值
+  
 }
