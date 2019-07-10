@@ -115,6 +115,7 @@ form 表单会自动提交数据，所以需要阻止默认行为  @click.preven
 import { reqSendCode, reqPwdLogin, reqSmsLogin } from '../../api'
 //import { RECEIVE_USER } from '../../vuex/mutation-types'
   export default {
+    name:'Login',
     data(){
       return{
         // 布尔类型判断，true为短信登录，false为密码

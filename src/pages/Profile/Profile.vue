@@ -105,9 +105,12 @@
 import { mapState } from 'vuex'
 import { Button,MessageBox } from 'mint-ui'
   export default {
+    name:'Profile',
     // 映射属性写在计算属性内
       computed:{
-        ...mapState(['user'])
+        ...mapState({
+          user: state => state.user.user
+        })
       },
       methods: {
       logout () {

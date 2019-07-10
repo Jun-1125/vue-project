@@ -6,6 +6,7 @@
 
 <script type="text/ecmascript-6">
   export default {
+    name:'Star',
     props: {
       score: Number, // 评分
       size: Number, // 尺寸
@@ -33,7 +34,6 @@
           arr.push('off')
         }
         
-
         return arr
       }
     }

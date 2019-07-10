@@ -6,6 +6,7 @@ import App from './App'
 import router from './router'
 import store from './vuex/store'
 import Header from './components/Header/Header.vue'
+import CartControl from './components/CartControl/CartControl.vue'
 import Star from './components/Star/Star.vue'
 import './mock/mockServer'
 
@@ -15,6 +16,7 @@ import './validate'
 //定义全局组件(所有组件都可以看到) 组件引入不能使用先注册，就是指定标签名
 Vue.component('Header',Header)
 Vue.component('Star',Star)
+Vue.component('CartControl',CartControl)
 Vue.component( Button.name, Button )//minit按钮
 
 /* eslint-disable no-new */

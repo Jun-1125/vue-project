@@ -56,7 +56,10 @@
 
     // vuex中映射成计算属性
     computed: {
-      ...mapState(['address', 'categorys']),
+      ...mapState({
+        address: state => state.msite.address,
+        categorys:state => state.msite.categorys
+      }),
 
       /* 
       根据分类的一维数组生成二维数组

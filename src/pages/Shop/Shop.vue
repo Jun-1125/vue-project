@@ -20,9 +20,13 @@
 <script type="text/ecmascript-6">
 import ShopHeader from '../../components/ShopHeader/ShopHeader.vue'
   export default {
+    name:'Shop',
     //发送请求
     mounted () {
+      //将info从接口请求获取到state中
       this.$store.dispatch('getShopInfo')
+      this.$store.dispatch('getShopGoods')
+      this.$store.dispatch('getShopRatings')
     },
     components:{
       ShopHeader

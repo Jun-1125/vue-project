@@ -66,7 +66,9 @@ import { mapState } from 'vuex'
     // 计算属性
     // shops是个数组  决定了状态的属性和读取的属性是shops  如果名字不一样需要写成对象的形式
     computed: {
-      ...mapState(['shops'])
+      ...mapState({
+        shops: state => state.msite.shops
+      })
     }
   }
 </script>
