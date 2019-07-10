@@ -10,6 +10,8 @@ import Star from './components/Star/Star.vue'
 import './mock/mockServer'
 
 import { Button } from 'mint-ui'
+// 表单的验证
+import './validate'
 //定义全局组件(所有组件都可以看到) 组件引入不能使用先注册，就是指定标签名
 Vue.component('Header',Header)
 Vue.component('Star',Star)

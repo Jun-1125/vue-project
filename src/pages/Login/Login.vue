@@ -12,14 +12,18 @@
         <form>
           <div :class="{on: loginType}">
             <section class="login_message">
-              <input type="tel" maxlength="11" placeholder="手机号" v-model="phone">
+              <input type="tel" maxlength="11" v-model="phone" name="phone" v-validate="'required|email'">
+
               <button :disabled="!isRightPhone || computeTime>0" class="get_verification" 
                 :class="{right_phone_number: isRightPhone}" @click.prevent="sendCode">
                 {{computeTime>0 ? `已发送验证码(${computeTime}s)` : '获取验证码'}}
               </button>
+              <!-- 手机号码表单验证 -->
+              <span style="color: red;" v-show="errors.has('phone')">{{ errors.first('phone') }}</span>
+
             </section>
             <section class="login_verification">
-              <input type="tel" maxlength="8" placeholder="验证码" v-model="code">
+              <input type="tel" maxlength="8" placeholder="验证码" name="code" v-model="code">
             </section>
             <section class="login_hint">
               温馨提示：未注册硅谷外卖帐号的手机号，登录时将自动注册，且代表已同意
@@ -29,7 +33,10 @@
           <div :class="{on: !loginType}">
             <section>
               <section class="login_message">
-                <input type="text" placeholder="用户名" v-model="name">
+                <!-- 验证 -->
+                <input type="text" maxlength="11" placeholder="用户名" 
+                name="name" v-model="name" v-validate="'required'">
+                <span v-show="errors.has('name')" style="color: red">{{ errors.first('name') }}</span>
               </section>
               <section class="login_verification">
                 <input :type="isShowPwd ? 'text' : 'password'" maxlength="8" placeholder="密码" v-model="pwd">
@@ -149,22 +156,21 @@ import { reqSendCode, reqPwdLogin, reqSmsLogin } from '../../api'
         const intervalId = setInterval(() => {
           this.computeTime--
           // 一旦到了0, 清除定时器
-          if (this.computeTime===0) {
+          if (this.computeTime<=0) {
+            this.computeTime = 0
             clearInterval(intervalId)
           }
         }, 1000)
 
-
-      // 表单验证
-
-
+        const result = await reqSendCode(this.phone)
         // 发送ajax请求：发送短信验证码
         // 调用api  reqSendCode(promise对象)  传的参数是phone（api接口文档）
         // 定义常量result接收结果  使用了axsion响应拦截器让成功的回调得到的四reponse data
-        const result = await reqSendCode(this.phone)
+        //const result = response.data
         if(result.code===0){
             alert('短信已成功发送')
         }else{
+          this.computeTime = 0
           alert(result.msg)
         }
       },
@@ -184,33 +190,42 @@ import { reqSendCode, reqPwdLogin, reqSmsLogin } from '../../api'
 
       // 登录(需要收集数据====短信登录还是密码登录，手机号，短信验证码，用户名，密码，图形验证码)
       async login () {
-        let result
+        
         //1.获取数据（密码或者短信登录），拿到结果result,根据拿到的结果处理响应
         const {loginType, phone, code, name, pwd, captcha} = this
-        // 发密码登录的请求
-        if(!loginType){//resulut不一致
-          result = await reqPwdLogin({name,pwd,captcha})
-        }else{
-          // 发短信登录的请求（异步，ajax函数发送请求，每个函数返回的都是promise）
-          result = await reqSmsLogin(phone,code)
+        let names
+        if (loginType) {
+          names = ['phone']
+        } else {
+          names = ['name']
         }
 
         // 2.根据结果处理进行响应处理
-        console.log('result',result)
-
-        //成功的状态code=0，data中包含_id,name,token {code: 0, data: {code: 0   data: {_id: "", name: "", token:}
-        // token和cookies一样是有有效期的
-        if(result.code === 0){
-          // 将user信息保存到state中
-          const user = result.data
-          //this.$store.commit(RECEIVE_USER,{user})=====在action中定义了一个函数记录user（持久化保存token,在state中保存user）
-          //dispatch做了两件事： 将token传到locaStorage中,将user传到vuex中的state
-          // 请求需要授权检查的接口时，自动携带token，在响应拦截器中操作
-          this.$store.dispatch('recordUser',user)
-          // 跳转到个人中心
-          this.$router.replace('/profile')
-        }else{//登录失败
-          alert(result.msg)
+        //console.log('result',result)
+        const success = await this.$validator.validateAll(names)
+        if (success) {
+          let result
+          // alert('验证通过, 发ajax请求')
+          if (loginType) {
+             result = await reqSmsLogin(phone, code)
+          } else {
+            result = await reqPwdLogin({name, pwd, captcha})
+          }
+          // const result = response.data
+          //成功的状态code=0，data中包含_id,name,token {code: 0, data: {code: 0   data: {_id: "", name: "", token:}
+          // token和cookies一样是有有效期的
+          if(result.code === 0){
+            // 将user信息保存到state中
+            const user = result.data
+            //this.$store.commit(RECEIVE_USER,{user})=====在action中定义了一个函数记录user（持久化保存token,在state中保存user）
+            //dispatch做了两件事： 将token传到locaStorage中,将user传到vuex中的state
+            // 请求需要授权检查的接口时，自动携带token，在响应拦截器中操作
+            this.$store.dispatch('recordUser',user)
+            // 跳转到个人中心
+            this.$router.replace('/profile')
+          }else{//登录失败
+            alert(result.msg)
+          }
         }
       }
     }
