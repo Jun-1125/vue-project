@@ -20,7 +20,7 @@ const state = {
     goods: [], // 商品列表
     ratings: [], // 商家评价列表
     info: {}, // 商家信息
-    foods:[]//购物车食物数组(在计算属性中会自动收集数据，现在手动设置一个状态进行设置)
+    cartFoods:[]//购物车食物数组(在计算属性中会自动收集数据，现在手动设置一个状态进行设置)
 }
 
 const mutations = {
@@ -65,8 +65,8 @@ const mutations = {
             food.count--
             /* 从cartFoods中删除此food，同时删除此属性，因为下次会进入上面的重新添加属性，
             若不删就会直接进入else判断,不会进入创建新属性了 */
-            delete count
             if(food.count===0){
+                delete food.count//删除food中count属性
                 /* splice()  增删改均可
                 splice() 方法通过删除或替换现有元素或者原地添加新的元素来修改数组,
                     并以数组形式返回被修改的内容。此方法会改变原数组
@@ -153,6 +153,15 @@ const getters = {
         return foods
     } 
     */
+        //总数量 (根据状态)
+        totalCount (state) {//当前的数据+当前food中的值
+            return state.cartFoods.reduce((pre,food) => pre +food.count,0)
+        },
+        // 总价格
+        totalPrice (state) {
+            return state.cartFoods.reduce((pre,food) => pre + food.count * food.price,0)
+        }
+        
 }
 
 export default {

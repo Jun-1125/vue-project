@@ -68,6 +68,14 @@ import ShopCart from '../../components/ShopCart/ShopCart.vue'
       }
     },
     // mounted是在界面显示后执行
+    mounted (){
+      // 如果当前数据已经有了=====>列表数据已经显示了
+      // (和watch中的不影响)针对的是别的路由跳转过来
+      if(this.goods.length>0){
+        this.initScroll()
+        this.initTops()
+      }
+    },
     computed:{
       ...mapState({
         goods: state => state.shop.goods
@@ -91,10 +99,10 @@ import ShopCart from '../../components/ShopCart/ShopCart.vue'
         return index//分类的下标
       }
     },
-    mounted(){
-      /* new BScroll(this.$refs.leftWrapper,{})
-      new BScroll(this.$refs.rightWrapper,{}) */
-    },
+    /* mounted(){
+      // new BScroll(this.$refs.leftWrapper,{})
+      //new BScroll(this.$refs.rightWrapper,{}) 
+    }, */
     //绑定监听
     watch:{
       goods(){
