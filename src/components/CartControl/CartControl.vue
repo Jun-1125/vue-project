@@ -18,7 +18,7 @@
           updateFoodCount (isAdd) {
             //   this.food.count   不是此组件的，数据在哪个组件，更新数据就在哪个组件
             //food  vuex中的state中 food==>foods==>goods==> state(vuex)   
-            //所以需要dispatch   dispatch只能两个参数，第一个是action   第二个是数据
+            //所以需要commit/dispatch   dispatch只能两个参数，第一个是action   第二个是数据
             //this.$store.dispatch('updateFoodCount',isAdd,this.food) 所以需要对象包裹
             this.$store.dispatch('updateFoodCount',{isAdd,food:this.food})
           }

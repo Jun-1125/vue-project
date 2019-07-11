@@ -3,7 +3,6 @@
     <div class="goods">
       <div class="menu-wrapper" ref="leftWrapper">
         <ul ref="leftUl">
-          <!-- current -->
           <li class="menu-item" v-for="(good,index) in goods" :key="good.name" 
           :class="{current:currentIndex===index}" @click="clickItem(index)">
             <span class="text bottom-border-1px">
@@ -19,7 +18,8 @@
           <li class="food-list-hook" v-for="good in goods" :key="good.name">
             <h1 class="title">{{good.name}}</h1>
             <ul>
-              <li class="food-item bottom-border-1px" v-for="food in good.foods" :key="food.name">
+              <li class="food-item bottom-border-1px" v-for="food in good.foods" 
+                :key="food.name" @click="showFood(food)">
                 <div class="icon">
                   <img width="57" height="57" :src="food.icon">
                 </div>
@@ -43,40 +43,52 @@
           
         </ul>
       </div>
+
+      <!-- <ShopCart/> -->
+      <shop-cart/>
     </div>
+
+    <Food ref="food" :food="food"/>
+    <!-- <Food v-show="isShow"/>  可以直接显示子组件Food -->
   </div>
 </template>
 
 <script type="text/ecmascript-6">
 import BScroll from 'better-scroll'
 import { mapState } from 'vuex'
+import Food from '../../components/Food/Food.vue'//在components中注册组件
+import ShopCart from '../../components/ShopCart/ShopCart.vue'
   export default {
     name:'ShopGoods',
     data(){
       return{
         scrollY:0,//右侧滑动的坐标:scollY,初始为0，滑动右侧时不断更新
-        tops:[]//右侧所有分类li的top的数组:tops,初始值为[],列表数据显示之后统计tops
+        tops:[],//右侧所有分类li的top的数组:tops,初始值为[],列表数据显示之后统计tops,
+        food:{},//需要显示的food(子组件中拿这个food进行使用,子组件中使用props中声明可使用)
       }
     },
+    // mounted是在界面显示后执行
     computed:{
       ...mapState({
         goods: state => state.shop.goods
       }),
-
-      //当前分类的下标
-      currentIndex(){
-        const {scrollY,tops} = this
-        //计算出最新的下标
-        const index = tops.findIndex((top,index) => scrollY>=top && scrollY<tops[index+1])
-        //如果index有变化
-        if(index!==this.index && this.leftScroll){
-            //保存index
-            this.index = index
-            //在当前分类发生变化时，让右侧列表滑到当前分类处
-            const li = this.$refs.leftUl.children[index]
-            this.leftScroll.scrollToElement(li,300)
+     
+      // 因为在shop内发送的请求，在外面不在当前组件   路由组件第一次访问的时候就有了    不是更新后才有数据
+      // 当前分类的下标  currentIndex初始时调用一次，index是没值的
+      currentIndex () {
+        const {scrollY, tops} = this
+        // 计算出最新的下标  index最新的下标，判断和当前的下标进行比较
+        const index = tops.findIndex((top, index) => scrollY>=top && scrollY<tops[index+1])
+        // 如果index有变化  this.leftScroll中leftScroll开始是没值的
+        if (index!==this.index && this.leftScroll) {
+          // 保存index(当前的下标)  如果放在if前，会理解为重新赋值
+          this.index = index
+          // 在当前分类发生变化时, 让右侧列表滑动当前分类处
+          const li = this.$refs.leftUl.children[index]//先找到li   从父找子节点
+          this.leftScroll.scrollToElement(li, 300)//scrollToElement滑动到当前元素 
         }
-        return index
+
+        return index//分类的下标
       }
     },
     mounted(){
@@ -96,7 +108,7 @@ import { mapState } from 'vuex'
 
     methods:{
       //初始化滚动
-      initScroll(){
+      initScroll(){//Scroll禁止了点击事件，所有的点击事件都是由他进行分发
         this.leftScroll = new BScroll(this.$refs.leftWrapper,{
           //标识分发点击事件
           click:true
@@ -127,7 +139,7 @@ import { mapState } from 'vuex'
             this.scrollY = Math.abs(y)
         })
       },
-
+      // 初始化y轴的top
       initTops(){
         const tops = []
         let top = 0
@@ -144,6 +156,7 @@ import { mapState } from 'vuex'
         this.tops = tops
         console.log('tops',tops)
       },
+      //根据下标点击事件
       clickItem(index){
         const top = this.tops[index]
         //让当前分类项立即变化（左侧分类变了，说明current变了，说明scrollY变了）
@@ -152,7 +165,34 @@ import { mapState } from 'vuex'
         // 想要使用上面的rightScroll，将保存的this拿到这里使用
         // 需要正值，但是沿着y轴向下滑动，得到的是负值，负负得正
         this.rightScroll.scrollTo(0,-top,300)
+      },
+
+      //显示指定的food
+      //父组件，Food是子组件
+      /*
+      父子组件关系(父组件内有子组件的标签) 
+      子组件调用父组件的方法/函数：函数类型的props
+      父组件调用子组件的方法：(通过ref标识子组件标签)
+                          将方法作为标签属性的方法传递给父组件（从而在父组件内调用子组件对象，可以调用其内部的方法）
+
+        现在父组件想要调用子组件的方法(toggleShow)
+        调用的其实是子组件对象的方法（toggleShow） 
+        组件和组件对象是两个不同的概念
+
+        <Food ref="food"/>子标签
+        ref标识子组件标签，从而得到子组件对象，父组件可以调用其内部的方法
+       */
+      showFood(food){
+        //data中的food什么时候有值
+        this.food = food
+        //ref标识子标签Food，此时的food为ref标识子标签定义的
+        this.$refs.food.toggleShow()
       }
+    },
+
+    components:{
+      Food,
+      ShopCart
     }
   }
 </script>
